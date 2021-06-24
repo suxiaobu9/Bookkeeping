@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Model.Appsetting;
+using Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,8 +28,19 @@ namespace Bookkeeping
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //每次Call Method都注入一個新的
+            //services.AddTransient
+
+            //每個LifeCycle注入一個新的
+            //services.AddScoped   
+
+            //只會在站台啟動時注入一個新的
+            //services.AddSingleton
+
+            services.AddTransient<ILineBotMessageService, LineBotMessageService>();
 
             services.AddControllers();
+            services.Configure<LineBot>(Configuration.GetSection("LineBot"));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Bookkeeping", Version = "v1" });
