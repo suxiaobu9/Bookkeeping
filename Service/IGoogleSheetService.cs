@@ -36,5 +36,30 @@ namespace Service
         /// <param name="credentialString"></param>
         /// <returns></returns>
         public IList<IList<object>> ReadValue(string range);
+
+        /// <summary>
+        /// 範本是否存在
+        /// </summary>
+        /// <returns></returns>
+        public bool IsTemplateSheetExists();
+
+        /// <summary>
+        /// Sheet是否存在
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool IsSheetExist(string name);
+
+
+        /// <summary>
+        /// 複製template建立新的Sheet
+        /// </summary>
+        public void CreateSheetFromTemplate(string newSheetName);
+
+        /// <summary>
+        /// 刪除sheet
+        /// </summary>
+        /// <param name="name"></param>
+        public void DeleteSheet(string name);
     }
 }

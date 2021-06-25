@@ -9,6 +9,6 @@ namespace Model.Appsetting
     public class GoogleSheetModel
     {
         public string SpreadSheetId { get; set; }
-        public string Url { get; set; }
+        public string TemplateSheetId { get; set; }
     }
 }

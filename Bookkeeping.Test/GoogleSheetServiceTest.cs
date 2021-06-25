@@ -61,9 +61,32 @@ namespace Bookkeeping.Test
         public void Write_Value_To_Google_Sheet()
         {
             var oldCount = _googleSheetService.GetTotalColumnCount(sheetName, "A");
-            _googleSheetService.WriteValue($"{sheetName}!A{oldCount + 1}", new List<IList<object>> { new List<object> { oldCount+1 } });
+            _googleSheetService.WriteValue($"{sheetName}!A{oldCount + 1}", new List<IList<object>> { new List<object> { oldCount + 1 } });
             var newCount = _googleSheetService.GetTotalColumnCount(sheetName, "A");
             Assert.IsTrue(oldCount < newCount);
+        }
+
+        [TestMethod]
+        public void Template_Sheet_Exist()
+        {
+            var isExist = _googleSheetService.IsTemplateSheetExists();
+            Assert.IsTrue(isExist);
+        }
+
+        [TestMethod]
+        public void Sheet_Exist()
+        {
+            var isExist = _googleSheetService.IsSheetExist(sheetName);
+            Assert.IsTrue(isExist);
+        }
+
+        [TestMethod]
+        public void Create_And_Delete_Sheet_From_Template()
+        {
+            _googleSheetService.CreateSheetFromTemplate(DateTime.Now.ToString("yyyyMMdd"));
+            _googleSheetService.DeleteSheet(DateTime.Now.ToString("yyyyMMdd"));
+
+            Assert.IsTrue(true);
         }
     }
 }

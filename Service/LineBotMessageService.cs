@@ -19,7 +19,7 @@ namespace Service
         }
         private readonly LineBot _lineBot;
         private readonly IGoogleSheetService _googleSheetService;
-        private static readonly object LockObj = new object();
+        private static readonly object LockObj = new();
 
         public void Process(isRock.LineBot.Event lineEvent)
         {
@@ -28,11 +28,16 @@ namespace Service
                                 .Where(x => !x.Ext_IsNullOrEmpty())
                                 .ToList<object>();
             var workSheetData = new List<IList<object>>();
-            var twNow = DateTime.UtcNow.AddHours(8);
-            var nowDay = twNow.ToString("dd");
 
             if (textSplitData.Count > 4)
                 throw new Exception("格式錯誤！");
+
+            var twNow = DateTime.UtcNow.AddHours(8);
+            var nowDay = twNow.ToString("dd");
+            var tableName = twNow.ToString("MM月");
+
+            if (!_googleSheetService.IsSheetExist(tableName) && _googleSheetService.IsTemplateSheetExists())
+                _googleSheetService.CreateSheetFromTemplate(tableName);
 
             switch (textSplitData.Count)
             {
@@ -49,8 +54,6 @@ namespace Service
             }
 
             workSheetData.Add(textSplitData);
-
-            var tableName = twNow.ToString("MM月");
 
             var startColumn = _lineBot.Bo == lineEvent.source.userId ? "A" : "F";
 

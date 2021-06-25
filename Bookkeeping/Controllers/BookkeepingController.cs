@@ -12,8 +12,11 @@ using System.Threading.Tasks;
 
 namespace Bookkeeping.Controllers
 {
+    /// <summary>
+    /// ngrok http 5000 -host-header="localhost:5000"
+    /// </summary>
     [Route("api/[controller]")]
-        [ApiExplorerSettings(IgnoreApi = true)]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class BookkeepingController : LineWebHookControllerBase
     {
         public BookkeepingController(IOptions<LineBot> lintBot,

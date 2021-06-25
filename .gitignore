@@ -386,3 +386,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+/Bookkeeping/token.json/Google.Apis.Auth.OAuth2.Responses.TokenResponse-user
