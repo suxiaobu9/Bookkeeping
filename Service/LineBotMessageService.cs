@@ -11,12 +11,15 @@ namespace Service
 {
     public class LineBotMessageService : ILineBotMessageService
     {
-        public LineBotMessageService(IOptions<LineBot> lintBot)
+        public LineBotMessageService(IOptions<LineBot> lintBot,
+            IGoogleSheetService googleSheetService)
         {
             _lineBot = lintBot.Value;
+            _googleSheetService = googleSheetService;
         }
-
         private readonly LineBot _lineBot;
+        private readonly IGoogleSheetService _googleSheetService;
+        private static readonly object LockObj = new object();
 
         public void Process(isRock.LineBot.Event lineEvent)
         {
@@ -31,7 +34,7 @@ namespace Service
             if (textSplitData.Count > 4)
                 throw new Exception("格式錯誤！");
 
-            switch(textSplitData.Count)
+            switch (textSplitData.Count)
             {
                 case 1:
                     textSplitData.InsertRange(0, new List<object> { nowDay, "現金" });
@@ -41,7 +44,7 @@ namespace Service
                     textSplitData.InsertRange(0, new List<object> { nowDay, "現金" });
                     break;
                 case 3:
-                    textSplitData.Insert(0,  nowDay);
+                    textSplitData.Insert(0, nowDay);
                     break;
             }
 
@@ -49,10 +52,17 @@ namespace Service
 
             var tableName = twNow.ToString("MM月");
 
-            var startColumn = (_lineBot.Bo == lineEvent.source.userId ? "A" : "F");
+            var startColumn = _lineBot.Bo == lineEvent.source.userId ? "A" : "F";
 
-
+            lock (LockObj)
+            {
+                var columnNumber = (_googleSheetService.GetTotalColumnCount(tableName, startColumn) + 1).ToString();
+                var endColumn = char.ToString((char)(Convert.ToInt32(startColumn[0]) + 3)) + columnNumber;
+                var range = $"{tableName}!{startColumn}:{endColumn}";
+                _googleSheetService.WriteValue(range, workSheetData);
+            }
 
         }
+
     }
 }

@@ -38,9 +38,12 @@ namespace Bookkeeping
             //services.AddSingleton
 
             services.AddTransient<ILineBotMessageService, LineBotMessageService>();
+            services.AddTransient<IGoogleSheetService, GoogleSheetService>();
 
             services.AddControllers();
             services.Configure<LineBot>(Configuration.GetSection("LineBot"));
+            services.Configure<GoogleSheetCredential>(Configuration.GetSection("GoogleSheetCredential"));
+            services.Configure<GoogleSheetModel>(Configuration.GetSection("GoogleSheet"));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Bookkeeping", Version = "v1" });

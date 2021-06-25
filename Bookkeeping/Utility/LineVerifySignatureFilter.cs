@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
@@ -7,20 +8,27 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Hosting;
 
 namespace Bookkeeping.Utility
 {
     public class LineVerifySignatureFilter : IAuthorizationFilter
     {
-        public LineVerifySignatureFilter(IOptions<LineBot> linebot)
+        public LineVerifySignatureFilter(IOptions<LineBot> linebot,
+            IWebHostEnvironment env)
         {
             _lineBot = linebot.Value;
+            _env = env;
         }
 
         private readonly LineBot _lineBot;
+        private readonly IWebHostEnvironment _env;
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
+            if (_env.IsDevelopment())
+                return;
+
             context.HttpContext.Request.EnableBuffering();
 
             string requestBody = new StreamReader(context.HttpContext.Request.Body).ReadToEndAsync().Result;

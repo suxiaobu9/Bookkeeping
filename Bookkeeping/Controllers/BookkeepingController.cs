@@ -13,8 +13,7 @@ using System.Threading.Tasks;
 namespace Bookkeeping.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class BookkeepingController : LineWebHookControllerBase
+    public class BookkeepingController : LineBotBaseController
     {
         public BookkeepingController(IOptions<LineBot> lintBot,
             ILineBotMessageService lineBotMessageService)
@@ -27,8 +26,14 @@ namespace Bookkeeping.Controllers
         private readonly LineBot _lineBot;
         private readonly ILineBotMessageService _lineBotMessageService;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpPost]
         [LineVerifySignature]
+        [ApiExplorerSettings(IgnoreApi = false)]
+
         public IActionResult Post()
         {
             foreach (var lineEvent in this.ReceivedMessage.events)
