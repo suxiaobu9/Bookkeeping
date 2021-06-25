@@ -23,8 +23,7 @@ namespace Service
 
         public GoogleSheetService(
              IOptions<GoogleSheetCredential> googleSheetCredential,
-             IOptions<GoogleSheetModel> googleSheet
-             )
+             IOptions<GoogleSheetModel> googleSheet)
         {
             var credentialString = googleSheetCredential.Value.Ext_ToJson();
             _sheetsService = OpenSheet(credentialString);
@@ -69,14 +68,14 @@ namespace Service
         {
             SpreadsheetsResource.ValuesResource.GetRequest request =
                     _sheetsService.Spreadsheets.Values.Get(_googleSheet.SpreadSheetId, range);
-            
+
             ValueRange response = request.Execute();
             IList<IList<object>> values = response.Values;
 
             return values;
         }
 
-        public int GetTotalColumnCount(string tableName, string startColumn)
+        public int? GetTotalColumnCount(string tableName, string startColumn)
         {
             //設定讀取最後一行位置
             var range = $"{tableName}!{startColumn}:{startColumn}";
@@ -84,7 +83,7 @@ namespace Service
             //最後一行位置
             IList<IList<object>> values = ReadValue(range);
 
-            return values.Count;
+            return values?.Count;
         }
 
         /// <summary>
@@ -107,7 +106,7 @@ namespace Service
 
             SpreadsheetsResource.ValuesResource.UpdateRequest upd
             = _sheetsService.Spreadsheets.Values.Update(writenRange, _googleSheet.SpreadSheetId, range);
-           
+
             upd.ValueInputOption =
                 SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
 

@@ -25,7 +25,7 @@ namespace Service
         /// <param name="tableName"></param>
         /// <param name="startColumn"></param>
         /// <returns></returns>
-        int GetTotalColumnCount(string tableName, string startColumn);
+        int? GetTotalColumnCount(string tableName, string startColumn);
 
         /// <summary>
         /// 讀取值 

@@ -13,7 +13,8 @@ using System.Threading.Tasks;
 namespace Bookkeeping.Controllers
 {
     [Route("api/[controller]")]
-    public class BookkeepingController : LineBotBaseController
+        [ApiExplorerSettings(IgnoreApi = true)]
+    public class BookkeepingController : LineWebHookControllerBase
     {
         public BookkeepingController(IOptions<LineBot> lintBot,
             ILineBotMessageService lineBotMessageService)
