@@ -44,7 +44,7 @@ namespace Bookkeeping.Utility
                 var xLineBytes = Convert.FromBase64String(xLineSignature);
                 if (!SlowEquals(xLineBytes, hash))
                 {
-                    //context.Result = new ForbidResult();
+                    context.Result = new ForbidResult();
                 }
             }
         }
