@@ -36,8 +36,11 @@ namespace Service
             var nowDay = twNow.ToString("dd");
             var tableName = twNow.ToString("MM月");
 
-            if (!_googleSheetService.IsSheetExist(tableName) && _googleSheetService.IsTemplateSheetExists())
-                _googleSheetService.CreateSheetFromTemplate(tableName);
+            if (!_googleSheetService.IsSheetExist(tableName))
+                if (_googleSheetService.IsTemplateSheetExists())
+                    _googleSheetService.CreateSheetFromTemplate(tableName);
+                else 
+                    throw new Exception("Template不存在");
 
             switch (textSplitData.Count)
             {
@@ -60,8 +63,7 @@ namespace Service
             lock (LockObj)
             {
                 var columnNumber = (_googleSheetService.GetTotalColumnCount(tableName, startColumn) + 1).ToString();
-                var endColumn = char.ToString((char)(Convert.ToInt32(startColumn[0]) + 3)) + columnNumber;
-                var range = $"{tableName}!{startColumn}:{endColumn}";
+                var range = $"{tableName}!{startColumn}{columnNumber}";
                 _googleSheetService.WriteValue(range, workSheetData);
             }
 
