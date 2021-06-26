@@ -35,18 +35,24 @@ namespace Bookkeeping.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        [LineVerifySignature]
+        //[LineVerifySignature]
         [ApiExplorerSettings(IgnoreApi = false)]
 
         public IActionResult Post()
         {
+            if (this.ReceivedMessage == null)
+            {
+                this.PushMessage(_lineBot.AdminUserId, "ReceivedMessage = null");
+                return Ok();
+            }
+
             foreach (var lineEvent in this.ReceivedMessage.events)
             {
                 try
                 {
-                    if ((lineEvent == null || lineEvent.replyToken == "00000000000000000000000000000000") &&
+                    if ((lineEvent == null || lineEvent.replyToken == "00000000000000000000000000000000") ||
                         (lineEvent.type.ToLower() != "message" || lineEvent.message.type != "text") ||
-                        lineEvent.source.userId != _lineBot.Bo ||
+                        lineEvent.source.userId != _lineBot.Bo &&
                         lineEvent.source.userId != _lineBot.Chien)
                         continue;
 

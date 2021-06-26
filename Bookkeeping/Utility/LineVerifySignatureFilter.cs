@@ -26,8 +26,8 @@ namespace Bookkeeping.Utility
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            if (_env.IsDevelopment())
-                return;
+            //if (_env.IsDevelopment())
+            //    return;
 
             context.HttpContext.Request.EnableBuffering();
 
@@ -44,7 +44,7 @@ namespace Bookkeeping.Utility
                 var xLineBytes = Convert.FromBase64String(xLineSignature);
                 if (!SlowEquals(xLineBytes, hash))
                 {
-                    context.Result = new ForbidResult();
+                    //context.Result = new ForbidResult();
                 }
             }
         }
