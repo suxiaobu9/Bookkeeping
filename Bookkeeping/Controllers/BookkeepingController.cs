@@ -35,7 +35,7 @@ namespace Bookkeeping.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        //[LineVerifySignature]
+        [LineVerifySignature]
         [ApiExplorerSettings(IgnoreApi = false)]
 
         public IActionResult Post()
