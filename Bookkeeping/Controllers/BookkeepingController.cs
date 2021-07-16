@@ -63,8 +63,8 @@ namespace Bookkeeping.Controllers
                 catch (Exception ex)
                 {
                     var msg = "發生錯誤:\n" + ex.Message;
-                    this.ReplyMessage(lineEvent.replyToken, msg);
                     this.PushMessage(_lineBot.AdminUserId, msg);
+                    this.ReplyMessage(lineEvent.replyToken, msg);
                 }
             }
 
