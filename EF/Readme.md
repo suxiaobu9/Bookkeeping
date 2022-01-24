@@ -1,0 +1,1 @@
+﻿dotnet ef dbcontext scaffold "Server=(localdb)\MSSQLLocalDB;Database=Blogging;Trusted_Connection=True" Microsoft.EntityFrameworkCore.SqlServer -o ./
