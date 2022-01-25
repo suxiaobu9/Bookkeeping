@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Service.EventService;
 using Service.User;
+using System.Text.RegularExpressions;
 
 namespace Service.Bookkeeping
 {
@@ -24,7 +25,7 @@ namespace Service.Bookkeeping
         /// </summary>
         /// <param name="lineEvent"></param>
         /// <returns></returns>
-        public async Task<string> Accounting(isRock.LineBot.Event lineEvent,EF.User user)
+        public async Task<string> Accounting(isRock.LineBot.Event lineEvent, EF.User user)
         {
             var message = lineEvent.message.text;
 
@@ -49,12 +50,48 @@ namespace Service.Bookkeeping
             switch (messsageSplit.Length)
             {
                 case 1:
-                    if (string.IsNullOrWhiteSpace(messsageSplit[0]) || !int.TryParse(messsageSplit[0], out amount))
+
+                    if (string.IsNullOrWhiteSpace(messsageSplit[0]))
                         return "請輸入金額 !";
 
-                    payEvent = await _eventService.GetEvent(eventName, user.Id);
+                    // 純數字
+                    if (Regex.Match(messsageSplit[0], @"^\d+$").Success)
+                    {
+                        payEvent = await _eventService.GetEvent(eventName, user.Id);
+                        break;
+                    }
 
-                    break;
+                    var regexParamList = new List<(string regexParam, string regexGetInt)>
+                    {
+                        // 數字開頭，帶文字 ex. 1000吃大餐
+                        (@"^\d+.+\n*$", @"^\d+"),
+
+                        // 文字開頭，帶數字 ex. 吃大餐1000
+                        (@".+\d+$\n*$", @"\d+$\n*"),
+                    };
+
+                    foreach (var (regexParam, regexGetInt) in regexParamList)
+                    {
+                        var regexMatch = Regex.Match(messsageSplit[0], regexGetInt);
+
+                        if (!regexMatch.Success)
+                            continue;
+
+                        regexMatch = Regex.Match(messsageSplit[0], regexGetInt);
+
+                        if (!regexMatch.Success)
+                            continue;
+
+                        messsageSplit = new string[]
+                        {
+                            messsageSplit[0].Substring(regexMatch.Index, regexMatch.Length),
+                            messsageSplit[0].Remove(regexMatch.Index,regexMatch.Length)
+                        };
+
+                        goto case 2;
+                    }
+
+                    return "請輸入金額 !";
                 case 2:
                     if (!int.TryParse(messsageSplit[0], out amount))
                     {
