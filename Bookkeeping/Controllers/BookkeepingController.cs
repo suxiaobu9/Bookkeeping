@@ -1,9 +1,11 @@
-﻿using isRock.LineBot;
+﻿using EF;
+using isRock.LineBot;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Model.AppSettings;
 using OfficeOpenXml;
 using Service.Bookkeeping;
+using Service.EventService;
 using Service.User;
 using Utility.LineVerify;
 
@@ -18,13 +20,22 @@ namespace Bookkeeping.Controllers
     {
         private readonly IUserService _userService;
         private readonly IBookkeepingService _bookkeepingService;
+        private readonly IEventService _eventService;
+        private readonly BookkeepingContext _db;
+        private readonly ILogger<BookkeepingController> _logger;
         public BookkeepingController(IUserService userService,
                                     IBookkeepingService bookkeepingService,
-                                    IOptions<LineBot> linebot)
+                                    IEventService eventService,
+                                    IOptions<LineBot> linebot,
+                                    ILogger<BookkeepingController> logger,
+                                    BookkeepingContext db)
         {
             _userService = userService;
             _bookkeepingService = bookkeepingService;
+            _eventService = eventService;
+            _db = db;
             this.ChannelAccessToken = linebot.Value.ChannelAccessToken;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -33,15 +44,74 @@ namespace Bookkeeping.Controllers
         {
             ExcelPackage.LicenseContext = LicenseContext.Commercial;
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            using var package = new ExcelPackage(new FileInfo(@"C:\Users\Bu9\Downloads\2020 - 記帳.xlsx"));
 
-            var aaa = package.Workbook.Worksheets;
-            foreach(var item in aaa)
+            var fileNames = new string[]
             {
+                @"C:\Users\Bu9\Downloads\2020 - 記帳.xlsx",
+                @"C:\Users\Bu9\Downloads\2021 - 記帳.xlsx",
+                @"C:\Users\Bu9\Downloads\2022 - 記帳.xlsx",
+            };
+
+
+            foreach (var fileName in fileNames)
+            {
+                Console.WriteLine("1234");
+                var fileInfo = new FileInfo(fileName);
+
+                var year = Convert.ToInt32(fileInfo.Name[..4]);
+
+                using var package = new ExcelPackage(fileInfo);
+
+                foreach (var worksheet in package.Workbook.Worksheets)
+                {
+                    var month = Convert.ToInt32(worksheet.Name[..2]);
+
+                    for (var i = 4; ; i++)
+                    {
+                        _logger.LogInformation($"{year} - {month} - {i}");
+                        if (worksheet.Cells[$"A{i}"].Value == null || string.IsNullOrWhiteSpace(worksheet.Cells[$"A{i}"].Value.ToString()))
+                            break;
+                        var aa = worksheet.Cells[$"C{i}"].Value;
+                        var payEvent = await _eventService.GetEvent(worksheet.Cells[$"D{i}"].Value.ToString(), 1);
+                        var pay = Convert.ToInt32(worksheet.Cells[$"C{i}"].Value.ToString());
+                        var day = Convert.ToInt32(worksheet.Cells[$"A{i}"].Value.ToString());
+                        var accountDate = new DateTime(year, month, day);
+                        await _db.Accountings.AddAsync(new Accounting
+                        {
+                            AccountDate = accountDate,
+                            Amount = pay,
+                            CreateDate = DateTime.UtcNow,
+                            EventId = payEvent.Id,
+                            UserId = 1
+                        });
+
+
+                        if (worksheet.Cells[$"F{i}"].Value == null || string.IsNullOrWhiteSpace(worksheet.Cells[$"F{i}"].Value.ToString()))
+                            continue;
+
+                        var payEvent1 = await _eventService.GetEvent(worksheet.Cells[$"I{i}"].Value.ToString(), 3);
+                        var pay1 = Convert.ToInt32(worksheet.Cells[$"H{i}"].Value.ToString());
+                        var day1 = Convert.ToInt32(worksheet.Cells[$"F{i}"].Value.ToString());
+                        var accountDate1 = new DateTime(year, month, day);
+                        await _db.Accountings.AddAsync(new Accounting
+                        {
+                            AccountDate = accountDate1,
+                            Amount = pay1,
+                            CreateDate = DateTime.UtcNow,
+                            EventId = payEvent1.Id,
+                            UserId = 3
+                        });
+
+                    }
+
+                }
+
 
             }
 
-                return Ok();
+            await _db.SaveChangesAsync();
+
+            return Ok();
         }
 
 
