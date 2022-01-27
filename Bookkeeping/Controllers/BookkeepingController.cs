@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Model.AppSettings;
+using OfficeOpenXml;
 using Service.Bookkeeping;
 using Service.User;
 using Utility.LineVerify;
@@ -24,6 +25,23 @@ namespace Bookkeeping.Controllers
             _userService = userService;
             _bookkeepingService = bookkeepingService;
             this.ChannelAccessToken = linebot.Value.ChannelAccessToken;
+        }
+
+        [HttpGet]
+        [Route("Sync")]
+        public async Task<IActionResult> Index1()
+        {
+            ExcelPackage.LicenseContext = LicenseContext.Commercial;
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using var package = new ExcelPackage(new FileInfo(@"C:\Users\Bu9\Downloads\2020 - 記帳.xlsx"));
+
+            var aaa = package.Workbook.Worksheets;
+            foreach(var item in aaa)
+            {
+
+            }
+
+                return Ok();
         }
 
 
