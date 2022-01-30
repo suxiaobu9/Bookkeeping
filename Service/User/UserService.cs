@@ -21,7 +21,7 @@ namespace Service.User
         /// <returns></returns>
         public async Task<EF.User?> GetAdmin()
         {
-            return await _db.Users.FirstOrDefaultAsync(x => x.IsAdmin);
+            return await _db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.IsAdmin);
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Service.User
         /// <returns></returns>
         public async Task<EF.User?> GetUser(string lineUserId)
         {
-            return await _db.Users.FirstOrDefaultAsync(x => x.LineUserId == lineUserId);
+            return await _db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.LineUserId == lineUserId);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Service.User
         /// <returns></returns>
         public async Task<EF.User[]> GetUsers(IEnumerable<string> lineUserIds)
         {
-            return await _db.Users.Where(x => lineUserIds.Contains(x.LineUserId)).ToArrayAsync();
+            return await _db.Users.AsNoTracking().Where(x => lineUserIds.Contains(x.LineUserId)).ToArrayAsync();
         }
     }
 }

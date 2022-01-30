@@ -1,7 +1,8 @@
 ﻿using EF;
 using Microsoft.EntityFrameworkCore;
+using Model.Line;
+using Model.StaticData;
 using Service.EventService;
-using Service.User;
 using System.Text.RegularExpressions;
 
 namespace Service.Bookkeeping
@@ -9,14 +10,11 @@ namespace Service.Bookkeeping
     public class BookkeepingService : IBookkeepingService
     {
         private readonly BookkeepingContext _db;
-        private readonly IUserService _userService;
         private readonly IEventService _eventService;
         public BookkeepingService(BookkeepingContext db,
-                                    IUserService userService,
                                     IEventService eventService)
         {
             _db = db;
-            _userService = userService;
             _eventService = eventService;
         }
 
@@ -25,24 +23,24 @@ namespace Service.Bookkeeping
         /// </summary>
         /// <param name="lineEvent"></param>
         /// <returns></returns>
-        public async Task<string> Accounting(isRock.LineBot.Event lineEvent, EF.User user)
+        public async Task<(bool isFlex, string message)> Accounting(isRock.LineBot.Event lineEvent, EF.User user)
         {
             var message = lineEvent.message.text;
 
             if (string.IsNullOrWhiteSpace(message))
-                return $"沒有輸入資料";
+                return (false, $"沒有輸入資料");
 
             var messsageSplit = message.Split(Environment.NewLine.ToCharArray())
                                         .Where(x => !string.IsNullOrWhiteSpace(x))
                                         .ToArray();
 
             if (messsageSplit == null || messsageSplit.Length == 0)
-                return $"沒有輸入資料";
+                return (false, $"沒有輸入資料");
 
             if (messsageSplit.Length > 2)
-                return $"格式錯誤 !{Environment.NewLine}金額{Environment.NewLine}說明";
+                return (false, $"格式錯誤 !{Environment.NewLine}金額{Environment.NewLine}說明");
 
-            var now = DateTime.UtcNow;
+            var utcNow = DateTime.UtcNow;
 
             var eventName = "其他";
             int amount = 0;
@@ -52,12 +50,13 @@ namespace Service.Bookkeeping
                 case 1:
 
                     if (string.IsNullOrWhiteSpace(messsageSplit[0]))
-                        return "請輸入金額 !";
+                        return (false, "請輸入金額 !");
 
                     // 純數字
                     if (Regex.Match(messsageSplit[0], @"^\d+$").Success)
                     {
-                        payEvent = await _eventService.GetEvent(eventName, user.Id);
+                        payEvent = await _eventService.CreateAndGetEvent(eventName, user.Id);
+                        amount = Convert.ToInt32(messsageSplit[0]);
                         break;
                     }
 
@@ -91,12 +90,12 @@ namespace Service.Bookkeeping
                         goto case 2;
                     }
 
-                    return "請輸入金額 !";
+                    return (false, "請輸入金額 !");
                 case 2:
                     if (!int.TryParse(messsageSplit[0], out amount))
                     {
                         if (!int.TryParse(messsageSplit[1], out amount))
-                            return $"格式錯誤 !{Environment.NewLine}金額{Environment.NewLine}說明";
+                            return (false, $"格式錯誤 !{Environment.NewLine}金額{Environment.NewLine}說明");
 
                         eventName = messsageSplit[0];
                     }
@@ -105,26 +104,72 @@ namespace Service.Bookkeeping
                         eventName = messsageSplit[1];
                     }
 
-                    payEvent = await _eventService.GetEvent(eventName, user.Id);
+                    payEvent = await _eventService.CreateAndGetEvent(eventName, user.Id);
 
                     break;
                 default:
-                    return "訊息長度異常 !";
+                    return (false, "訊息長度異常 !");
             }
 
-            _db.Accountings.Add(new Accounting
+            var accounting = new Accounting
             {
-                AccountDate = now,
-                CreateDate = now,
+                AccountDate = utcNow,
+                CreateDate = utcNow,
                 Amount = amount,
                 UserId = user.Id,
                 EventId = payEvent.Id,
-            });
+            };
+            _db.Accountings.Add(accounting);
 
             await _db.SaveChangesAsync();
 
-            return $"金額 : {amount}{Environment.NewLine}用途 : {eventName}";
+            var twNowDate = utcNow.AddHours(8).Date;
 
+            DateTime startDate = new DateTime(twNowDate.Year, twNowDate.Month, 1).AddHours(-8),
+                endDate = startDate.AddMonths(1).AddMilliseconds(-1);
+
+            var monthlyPay = _db.Accountings.AsNoTracking()
+                .Where(x => startDate <= x.AccountDate &&
+                                        x.AccountDate <= endDate &&
+                                        x.UserId == user.Id &&
+                                        x.Amount > 0)
+                .Sum(x => x.Amount);
+
+            var flexMessageModel = new AccountingFlexMessageModel
+            (
+                accounting.Id,
+                monthlyPay,
+                payEvent.Name,
+                amount,
+                utcNow.AddHours(8),
+                false
+            );
+
+            return (true, LineFlexTemplate.AccountingFlexMessageTemplate(flexMessageModel));
+        }
+
+        /// <summary>
+        /// 刪除帳務
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<string> DeleteAccounting(AccountingFlexMessageModel model, EF.User user)
+        {
+            var utcNow = DateTime.UtcNow;
+            if (utcNow > model.Deadline)
+                return "刪除失敗，請重新刪除，並於 2 分鐘內按下確定";
+
+            var accounting = await _db.Accountings.FirstOrDefaultAsync(x => x.UserId == user.Id && x.Id == model.AccountId);
+
+            if (accounting == null)
+                return "刪除成功";
+
+            _db.Accountings.Remove(accounting);
+
+            await _db.SaveChangesAsync();
+
+            return "刪除成功";
         }
     }
 }

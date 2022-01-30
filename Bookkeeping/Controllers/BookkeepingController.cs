@@ -5,11 +5,15 @@ using Model.AppSettings;
 using Service.Bookkeeping;
 using Service.User;
 using Utility.LineVerify;
+using System.Text.Json;
+using System.Text;
+using Model.Line;
+using Model.StaticData;
 
 namespace Bookkeeping.Controllers
 {
     /// <summary>
-    /// ngrok http 5000 -host-header="localhost:5000"
+    /// ngrok http 5144 -host-header="localhost:5144"
     /// </summary>
     [Route("api/[controller]")]
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -46,9 +50,9 @@ namespace Bookkeeping.Controllers
             {
                 var lineEvents = this.ReceivedMessage.events
                     .Where(x => x != null &&
-                                x.replyToken != "00000000000000000000000000000000" &&
+                                (x.type.ToLower() == "postback" || (
                                 x.type.ToLower() == "message" &&
-                                x.message.type == "text")
+                                x.message.type == "text")))
                     .ToArray();
 
                 var users = await _userService.GetUsers(lineEvents.Select(x => x.source.userId));
@@ -59,10 +63,18 @@ namespace Bookkeeping.Controllers
                     if (user == null)
                         continue;
 
-                    var message = await _bookkeepingService.Accounting(item, user);
+                    if (item.type.ToLower() == "postback")
+                    {
+                        await PostBack(item, user);
+                        continue;
+                    }
 
-                    this.ReplyMessage(item.replyToken, message);
+                    var (isFlex, message) = await _bookkeepingService.Accounting(item, user);
 
+                    if (isFlex)
+                        this.ReplyMessageWithJSON(item.replyToken, message);
+                    else
+                        this.ReplyMessage(item.replyToken, message);
                 }
             }
             catch (Exception ex)
@@ -74,6 +86,33 @@ namespace Bookkeeping.Controllers
             }
 
             return Ok();
+        }
+
+        /// <summary>
+        /// 刪除的 Flex Message PostBack
+        /// </summary>
+        /// <param name="lineEvent"></param>
+        /// <returns></returns>
+        private async Task PostBack(Event lineEvent, EF.User user)
+        {
+            var jsonData = Encoding.UTF8.GetString(Convert.FromBase64String(lineEvent.postback.data));
+            var model = JsonSerializer.Deserialize<AccountingFlexMessageModel>(jsonData);
+
+            if (model == null)
+                return;
+
+            if (!model.IsConfirm)
+            {
+                model.IsConfirm = true;
+                model.Deadline = DateTime.UtcNow.AddMinutes(2);
+                ReplyMessageWithJSON(lineEvent.replyToken, LineFlexTemplate.DeleteAccountingComfirm(model));
+                return;
+            }
+
+            var message = await _bookkeepingService.DeleteAccounting(model, user);
+
+            ReplyMessage(lineEvent.replyToken, message);
+
         }
     }
 }

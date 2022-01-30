@@ -1,10 +1,5 @@
 ﻿using EF;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Service.EventService
 {
@@ -23,7 +18,7 @@ namespace Service.EventService
         /// <param name="eventName"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<EF.Event> GetEvent(string eventName, int userId)
+        public async Task<EF.Event> CreateAndGetEvent(string eventName, int userId)
         {
             eventName = eventName.Trim();
             var payEvent = await _db.Events.FirstOrDefaultAsync(x => x.Name == eventName && x.UserId == userId);

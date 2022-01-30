@@ -15,9 +15,17 @@ builder.Services.AddDbContext<BookkeepingContext>(option => option.UseSqlServer(
 
 builder.Services.Configure<LineBot>(builder.Configuration.GetSection("LineBot"));
 
-builder.Services.AddTransient<IUserService, UserService>();
-builder.Services.AddTransient<IEventService, EventService>();
-builder.Services.AddTransient<IBookkeepingService, BookkeepingService>();
+//每次Call Method都注入一個新的
+//services.AddTransient
+
+//每個LifeCycle注入一個新的
+//services.AddScoped   
+
+//只會在站台啟動時注入一個新的
+//services.AddSingleton
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IBookkeepingService, BookkeepingService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Service.EventService
+﻿namespace Service.EventService
 {
     public interface IEventService
     {
@@ -14,6 +8,6 @@ namespace Service.EventService
         /// <param name="eventName"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public Task<EF.Event> GetEvent(string eventName, int userId);
+        public Task<EF.Event> CreateAndGetEvent(string eventName, int userId);
     }
 }
