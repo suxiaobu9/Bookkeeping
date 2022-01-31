@@ -138,7 +138,7 @@ namespace Service.Bookkeeping
             (
                 accounting.Id,
                 monthlyAccountings.Where(x => x.Amount > 0).Sum(x => x.Amount),
-                monthlyAccountings.Where(x => x.Amount < 0).Sum(x => x.Amount),
+                monthlyAccountings.Where(x => x.Amount < 0).Sum(x => x.Amount) * -1,
                 payEvent.Name,
                 amount,
                 utcNow.AddHours(8),
