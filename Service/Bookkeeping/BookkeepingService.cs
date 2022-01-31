@@ -52,8 +52,8 @@ namespace Service.Bookkeeping
                     if (string.IsNullOrWhiteSpace(messsageSplit[0]))
                         return (false, "請輸入金額 !");
 
-                    // 純數字
-                    if (Regex.Match(messsageSplit[0], @"^\d+$").Success)
+                    // 正負整數
+                    if (Regex.Match(messsageSplit[0], @"^-?\d+$").Success)
                     {
                         payEvent = await _eventService.CreateAndGetEvent(eventName, user.Id);
                         amount = Convert.ToInt32(messsageSplit[0]);
@@ -63,10 +63,10 @@ namespace Service.Bookkeeping
                     var regexParamList = new List<(string regexParam, string regexGetInt)>
                     {
                         // 數字開頭，帶文字 ex. 1000吃大餐
-                        (@"^\d+.+\n*$", @"^\d+"),
+                        (@"^-?\d+.+\n*$", @"^-?\d+"),
 
                         // 文字開頭，帶數字 ex. 吃大餐1000
-                        (@".+\d+$\n*$", @"\d+$\n*"),
+                        (@".+\d+$\n*$", @"-?\d+$\n*"),
                     };
 
                     foreach (var (regexParam, regexGetInt) in regexParamList)
@@ -128,17 +128,17 @@ namespace Service.Bookkeeping
             DateTime startDate = new DateTime(twNowDate.Year, twNowDate.Month, 1).AddHours(-8),
                 endDate = startDate.AddMonths(1).AddMilliseconds(-1);
 
-            var monthlyPay = _db.Accountings.AsNoTracking()
+            var monthlyAccountings = await _db.Accountings.AsNoTracking()
                 .Where(x => startDate <= x.AccountDate &&
                                         x.AccountDate <= endDate &&
-                                        x.UserId == user.Id &&
-                                        x.Amount > 0)
-                .Sum(x => x.Amount);
+                                        x.UserId == user.Id)
+                .ToArrayAsync();
 
             var flexMessageModel = new AccountingFlexMessageModel
             (
                 accounting.Id,
-                monthlyPay,
+                monthlyAccountings.Where(x => x.Amount > 0).Sum(x => x.Amount),
+                monthlyAccountings.Where(x => x.Amount < 0).Sum(x => x.Amount),
                 payEvent.Name,
                 amount,
                 utcNow.AddHours(8),

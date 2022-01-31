@@ -8,10 +8,11 @@ namespace Model.Line
 {
     public class AccountingFlexMessageModel
     {
-        public AccountingFlexMessageModel(int AccountId, int MonthlyPay, string EventName, int Pay, DateTime CreateDate, bool IsConfirm, DateTime? Deadline = null)
+        public AccountingFlexMessageModel(int AccountId, int MonthlyPay,int MonthlyIncome, string EventName, int Pay, DateTime CreateDate, bool IsConfirm, DateTime? Deadline = null)
         {
             this.AccountId = AccountId;
             this.MonthlyPay = MonthlyPay;
+            this.MonthlyIncome = MonthlyIncome;
             this.EventName = EventName;
             this.Pay = Pay;
             this.CreateDate = CreateDate;
@@ -29,6 +30,11 @@ namespace Model.Line
         /// 本月花費
         /// </summary>
         public int MonthlyPay { get; set; }
+
+        /// <summary>
+        /// 本月收入
+        /// </summary>
+        public int MonthlyIncome { get; set; }
 
         /// <summary>
         /// 用途
