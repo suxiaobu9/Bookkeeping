@@ -22,149 +22,172 @@ namespace Model.StaticData
 
         public static string AccountingFlexMessageTemplate(AccountingFlexMessageModel model) =>
             FlexMessage($@"
-    {{
-      ""type"": ""bubble"",
-      ""body"": {{
+{{
+  ""type"": ""bubble"",
+  ""body"": {{
+    ""type"": ""box"",
+    ""layout"": ""vertical"",
+    ""contents"": [
+      {{
+        ""type"": ""text"",
+        ""text"": ""DETAIL"",
+        ""weight"": ""bold"",
+        ""color"": ""#1DB446"",
+        ""size"": ""sm""
+      }},
+      {{
+        ""type"": ""text"",
+        ""text"": ""記帳明細"",
+        ""weight"": ""bold"",
+        ""size"": ""xxl"",
+        ""margin"": ""md""
+      }},
+      {{
         ""type"": ""box"",
-        ""layout"": ""vertical"",
+        ""layout"": ""horizontal"",
         ""contents"": [
           {{
             ""type"": ""text"",
-            ""text"": ""DETAIL"",
-            ""weight"": ""bold"",
-            ""color"": ""#1DB446"",
-            ""size"": ""sm""
+            ""text"": ""本月花費"",
+            ""size"": ""xs"",
+            ""color"": ""#aaaaaa"",
+            ""wrap"": true,
+            ""flex"": 0
           }},
           {{
             ""type"": ""text"",
-            ""text"": ""記帳明細"",
-            ""weight"": ""bold"",
-            ""size"": ""xxl"",
-            ""margin"": ""md""
+            ""text"": ""{model.MonthlyPay}"",
+            ""size"": ""xs"",
+            ""color"": ""#aaaaaa"",
+            ""align"": ""end""
+          }}
+        ],
+        ""offsetTop"": ""10px"",
+        ""paddingStart"": ""10px""
+      }},
+      {{
+        ""type"": ""box"",
+        ""layout"": ""horizontal"",
+        ""contents"": [
+          {{
+            ""type"": ""text"",
+            ""text"": ""本月收入"",
+            ""size"": ""xs"",
+            ""color"": ""#aaaaaa"",
+            ""wrap"": true,
+            ""flex"": 0
           }},
+          {{
+            ""type"": ""text"",
+            ""text"": ""{model.MonthlyIncome}"",
+            ""size"": ""xs"",
+            ""color"": ""#aaaaaa"",
+            ""align"": ""end""
+          }}
+        ],
+        ""offsetTop"": ""10px"",
+        ""paddingStart"": ""10px""
+      }},
+      {{
+        ""type"": ""separator"",
+        ""margin"": ""xxl""
+      }},
+      {{
+        ""type"": ""box"",
+        ""layout"": ""vertical"",
+        ""margin"": ""xxl"",
+        ""spacing"": ""sm"",
+        ""contents"": [
           {{
             ""type"": ""box"",
             ""layout"": ""horizontal"",
             ""contents"": [
               {{
                 ""type"": ""text"",
-                ""text"": ""本月花費"",
-                ""size"": ""xs"",
-                ""color"": ""#aaaaaa"",
-                ""wrap"": true,
+                ""text"": ""用途"",
+                ""size"": ""sm"",
+                ""color"": ""#555555"",
                 ""flex"": 0
               }},
               {{
                 ""type"": ""text"",
-                ""text"": ""{model.MonthlyPay}"",
-                ""size"": ""xs"",
-                ""color"": ""#aaaaaa"",
+                ""text"": ""{model.EventName}"",
+                ""size"": ""sm"",
+                ""color"": ""#111111"",
                 ""align"": ""end""
-              }}
-            ],
-            ""offsetTop"": ""10px"",
-            ""paddingStart"": ""10px""
-          }},
-          {{
-            ""type"": ""separator"",
-            ""margin"": ""xxl""
-          }},
-          {{
-            ""type"": ""box"",
-            ""layout"": ""vertical"",
-            ""margin"": ""xxl"",
-            ""spacing"": ""sm"",
-            ""contents"": [
-              {{
-                ""type"": ""box"",
-                ""layout"": ""horizontal"",
-                ""contents"": [
-                  {{
-                    ""type"": ""text"",
-                    ""text"": ""用途"",
-                    ""size"": ""sm"",
-                    ""color"": ""#555555"",
-                    ""flex"": 0
-                  }},
-                  {{
-                    ""type"": ""text"",
-                    ""text"": ""{model.EventName}"",
-                    ""size"": ""sm"",
-                    ""color"": ""#111111"",
-                    ""align"": ""end""
-                  }}
-                ]
-              }},
-              {{
-                ""type"": ""box"",
-                ""layout"": ""horizontal"",
-                ""contents"": [
-                  {{
-                    ""type"": ""text"",
-                    ""text"": ""金額"",
-                    ""size"": ""sm"",
-                    ""color"": ""#555555"",
-                    ""flex"": 0
-                  }},
-                  {{
-                    ""type"": ""text"",
-                    ""text"": ""{model.Pay}"",
-                    ""size"": ""sm"",
-                    ""color"": ""#111111"",
-                    ""align"": ""end""
-                  }}
-                ]
               }}
             ]
           }},
           {{
-            ""type"": ""separator"",
-            ""margin"": ""xxl""
-          }},
-          {{
             ""type"": ""box"",
             ""layout"": ""horizontal"",
-            ""contents"": [
-              {{
-                ""type"": ""button"",
-                ""action"": {{
-                  ""type"": ""postback"",
-                  ""label"": ""刪除"",
-                  ""data"": ""{Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(model)))}""
-                }},
-                ""margin"": ""5px"",
-                ""style"": ""primary"",
-                ""height"": ""sm"",
-                ""color"": ""#DC3545""
-              }}
-            ],
-            ""margin"": ""md"",
-            ""width"": ""90px""
-          }},
-          {{
-            ""type"": ""box"",
-            ""layout"": ""horizontal"",
-            ""margin"": ""md"",
             ""contents"": [
               {{
                 ""type"": ""text"",
-                ""text"": ""{model.CreateDate:yyyy-MM-dd HH:mm}"",
-                ""color"": ""#aaaaaa"",
-                ""size"": ""xxs"",
+                ""text"": ""金額"",
+                ""size"": ""sm"",
+                ""color"": ""#555555"",
+                ""flex"": 0
+              }},
+              {{
+                ""type"": ""text"",
+                ""text"": ""{model.Pay}"",
+                ""size"": ""sm"",
+                ""color"": ""#111111"",
                 ""align"": ""end""
               }}
             ]
           }}
         ]
       }},
-      ""styles"": {{
-        ""footer"": {{
-          ""separator"": true
-        }}
+      {{
+        ""type"": ""separator"",
+        ""margin"": ""xxl""
+      }},
+      {{
+        ""type"": ""box"",
+        ""layout"": ""horizontal"",
+        ""contents"": [
+          {{
+            ""type"": ""button"",
+            ""action"": {{
+              ""type"": ""postback"",
+              ""label"": ""刪除"",
+              ""data"": ""{Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(model)))}""
+            }},
+            ""margin"": ""5px"",
+            ""style"": ""primary"",
+            ""height"": ""sm"",
+            ""color"": ""#DC3545""
+          }}
+        ],
+        ""margin"": ""md"",
+        ""width"": ""90px""
+      }},
+      {{
+        ""type"": ""box"",
+        ""layout"": ""horizontal"",
+        ""margin"": ""md"",
+        ""contents"": [
+          {{
+            ""type"": ""text"",
+            ""text"": ""{model.CreateDate:yyyy-MM-dd HH:mm}"",
+            ""color"": ""#aaaaaa"",
+            ""size"": ""xxs"",
+            ""align"": ""end""
+          }}
+        ]
       }}
-    }}");
+    ]
+  }},
+  ""styles"": {{
+    ""footer"": {{
+      ""separator"": true
+    }}
+  }}
+}}");
 
-        public static string DeleteAccountingComfirm(AccountingFlexMessageModel model) => 
+        public static string DeleteAccountingComfirm(AccountingFlexMessageModel model) =>
             FlexMessage($@"
 {{
   ""type"": ""bubble"",
@@ -245,7 +268,6 @@ namespace Model.StaticData
       }}
     ]
   }}
-}}
-");
+}}");
     }
 }
