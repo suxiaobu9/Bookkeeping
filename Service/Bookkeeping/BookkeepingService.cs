@@ -60,23 +60,18 @@ namespace Service.Bookkeeping
                         break;
                     }
 
-                    var regexParamList = new List<(string regexParam, string regexGetInt)>
+                    var regexParamList = new List<string>
                     {
                         // 數字開頭，帶文字 ex. 1000吃大餐
-                        (@"^-?\d+.+\n*$", @"^-?\d+"),
+                        @"^-?\d+",
 
                         // 文字開頭，帶數字 ex. 吃大餐1000
-                        (@".+\d+$\n*$", @"-?\d+$\n*"),
+                        @"-?\d+$\n*",
                     };
 
-                    foreach (var (regexParam, regexGetInt) in regexParamList)
+                    foreach (var regexGetInt in regexParamList)
                     {
                         var regexMatch = Regex.Match(messsageSplit[0], regexGetInt);
-
-                        if (!regexMatch.Success)
-                            continue;
-
-                        regexMatch = Regex.Match(messsageSplit[0], regexGetInt);
 
                         if (!regexMatch.Success)
                             continue;
