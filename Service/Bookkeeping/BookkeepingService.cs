@@ -118,10 +118,13 @@ namespace Service.Bookkeeping
 
             await _db.SaveChangesAsync();
 
-            var twNowDate = utcNow.AddHours(8).Date;
+            var twNow = utcNow.AddHours(8);
 
-            DateTime startDate = new DateTime(twNowDate.Year, twNowDate.Month, 1).AddHours(-8),
+            DateTime startDate = new(twNow.Year, twNow.Month, 1),
                 endDate = startDate.AddMonths(1).AddMilliseconds(-1);
+
+            startDate = startDate.ToUniversalTime();
+            endDate = endDate.ToUniversalTime();
 
             var monthlyAccountings = await _db.Accountings.AsNoTracking()
                 .Where(x => startDate <= x.AccountDate &&
